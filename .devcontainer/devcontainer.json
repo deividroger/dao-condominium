@@ -1,0 +1,14 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+	"name": "DAO Condominium",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"workspaceFolder": "/app",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind",
+	
+  "remoteUser": "node",
+  "extensions": [
+	"nomicfoundation.hardhat-solidity"
+  ],
+}
