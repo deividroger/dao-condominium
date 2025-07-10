@@ -4,13 +4,15 @@
   "main": "index.js",
   "scripts": {
     "test": "npx hardhat test",
-    "compile": "npx hardhat compile"
+    "compile": "npx hardhat compile",
+    "test-coverage": "npx hardhat coverage"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.23.0"
+    "hardhat": "^2.23.0",
+    "solidity-coverage": "^0.8.16"
   }
 }

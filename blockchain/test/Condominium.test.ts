@@ -3,20 +3,10 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
 
-describe("Condominium", function () {
+import { Options } from './shared/Options';
+import { Status } from './shared/status';
 
-  enum Options {
-    EMPTY = 0,
-    YES = 1,
-    NO = 2,
-    ABSTENTION = 3
-  }
-  enum Status {
-    IDLE = 0,
-    VOTING = 1,
-    APPROVED = 2,
-    DENIED = 3
-  }
+describe("Condominium", function () {
 
   async function deployFixture() {
 
@@ -121,29 +111,13 @@ describe("Condominium", function () {
     await expect(contract.setCounselor(resident.address, true)).to.be.revertedWith("The counselor must be a resident");
   });
 
+  // it("Should set manager", async function () {
+  //   const { contract, manager, resident } = await loadFixture(deployFixture);
 
-  it("Should set manager", async function () {
-    const { contract, manager, resident } = await loadFixture(deployFixture);
+  //   await contract.setManager(resident.address);
 
-    await contract.setManager(resident.address);
-
-    expect(await contract.manager()).to.equal(resident.address);
-  });
-
-
-  it("Should not set manager (permission)", async function () {
-    const { contract, manager, resident } = await loadFixture(deployFixture);
-
-    const instance = contract.connect(resident);
-
-    await expect(instance.setManager(resident.address)).to.be.revertedWith("Only the manager can do this");
-  });
-
-  it("Should NOT set manager (address)", async function () {
-    const { contract, manager, resident } = await loadFixture(deployFixture);
-
-    await expect(contract.setManager("0x0000000000000000000000000000000000000000")).to.be.revertedWith("The address must be valid");
-  });
+  //   expect(await contract.manager()).to.equal(resident.address);
+  // });
 
   it("Should add topic (manager)", async function () {
     const { contract, manager, resident } = await loadFixture(deployFixture);
