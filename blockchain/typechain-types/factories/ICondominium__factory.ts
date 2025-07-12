@@ -38,7 +38,7 @@ const _abi = [
       },
       {
         internalType: "enum CondominiumLib.Category",
-        name: "",
+        name: "category",
         type: "uint8",
       },
       {
@@ -66,6 +66,34 @@ const _abi = [
       },
     ],
     name: "closeVoting",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "topicToEdit",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "description",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "responsible",
+        type: "address",
+      },
+    ],
+    name: "editTopic",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
