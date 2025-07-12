@@ -40,7 +40,7 @@ export interface ICondominiumInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addTopic",
-    values: [string, string]
+    values: [string, string, BigNumberish, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "closeVoting", values: [string]): string;
   encodeFunctionData(functionFragment: "openVoting", values: [string]): string;
@@ -133,7 +133,13 @@ export interface ICondominium extends BaseContract {
   >;
 
   addTopic: TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      arg2: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -176,7 +182,13 @@ export interface ICondominium extends BaseContract {
   getFunction(
     nameOrSignature: "addTopic"
   ): TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      arg2: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.28;
 
 library CondominiumLib {
-    
     enum Status {
         IDLE,
         VOTING,
@@ -12,10 +11,13 @@ library CondominiumLib {
     struct Topic {
         string title;
         string description;
+        Category category;
         Status status;
         uint256 createdDate;
         uint256 startDate;
         uint256 endDate;
+        uint amount;
+        address responsible;
     }
 
     enum Options {
@@ -23,6 +25,13 @@ library CondominiumLib {
         YES,
         NO,
         ABSTENTION
+    }
+
+    enum Category {
+        DECISION,
+        SPENT,
+        CHANGE_QUOTA,
+        CHANGE_MANAGER
     }
 
     struct Vote {

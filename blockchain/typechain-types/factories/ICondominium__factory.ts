@@ -36,6 +36,21 @@ const _abi = [
         name: "description",
         type: "string",
       },
+      {
+        internalType: "enum CondominiumLib.Category",
+        name: "",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
+        name: "responsible",
+        type: "address",
+      },
     ],
     name: "addTopic",
     outputs: [],

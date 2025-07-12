@@ -1,12 +1,32 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-
+import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { expect } from "chai";
 import hre from "hardhat";
 import { Options } from './shared/Options';
 import { Status } from './shared/status';
+import { Category } from "./shared/category";
+import { CondominiumAdapter } from "../typechain-types";
 
 describe("CondominiumAdapter", function () {
 
+     async function addVotes(adapter: CondominiumAdapter, count: number,accounts: SignerWithAddress[],topicName: string) {
+        for (let i = 1; i <=count; i++) {
+            const instance = adapter.connect(accounts[i-1]);
+            await instance.vote(topicName, Options.YES);
+            
+        }
+    }
+
+    async function addResidents(adapter: CondominiumAdapter, count: number, accounts: SignerWithAddress[]) {
+        for (let i = 1; i <= count; i++) {
+
+            const residenceId = (1000 * Math.ceil(i/25) ) + 
+                                (100 * Math.ceil(i/5)) +
+                                (i - (5 * Math.floor((i-1) /5)))
+
+            await adapter.addResident(accounts[i -1].address, residenceId);
+        }
+    }
 
     async function deployAdapterFixture() {
 
@@ -106,7 +126,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.upgrade(contractAddress);
 
-        await adapter.addTopic("topic 1", "description 1");
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
 
         expect(await contract.topicExists("topic 1")).to.equal(true);
 
@@ -120,7 +140,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.upgrade(contractAddress);
 
-        await adapter.addTopic("topic 1", "description 1");
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
 
         await adapter.removeTopic("topic 1");
 
@@ -137,7 +157,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.upgrade(contractAddress);
 
-        await adapter.addTopic("topic 1", "description 1");
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
 
         await adapter.openVoting("topic 1");
 
@@ -147,23 +167,7 @@ describe("CondominiumAdapter", function () {
 
     });
 
-    it("Should open voting", async function () {
-        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        const { contract } = await loadFixture(deployImplementationFixture);
 
-        const contractAddress = await contract.getAddress();
-
-        await adapter.upgrade(contractAddress);
-
-        await adapter.addTopic("topic 1", "description 1");
-
-        await adapter.openVoting("topic 1");
-
-        const topic = await contract.getTopic('topic 1');
-
-        expect(topic.status).to.equal(Status.VOTING);
-
-    });
 
     it("Should open VOTE", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
@@ -173,7 +177,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.upgrade(contractAddress);
 
-        await adapter.addTopic("topic 1", "description 1");
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
 
         await adapter.openVoting("topic 1");
 
@@ -194,14 +198,13 @@ describe("CondominiumAdapter", function () {
 
         await adapter.upgrade(contractAddress);
 
-        await adapter.addTopic("topic 1", "description 1");
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
 
         await adapter.openVoting("topic 1");
 
-        await adapter.addResident(accounts[1].address, 1301);
-        const instance = adapter.connect(accounts[1]);
+        await addResidents(adapter, 5, accounts);
 
-        await instance.vote('topic 1', Options.YES);
+        await addVotes(adapter, 5, accounts,"topic 1");
 
         await adapter.closeVoting("topic 1");
 
@@ -210,4 +213,5 @@ describe("CondominiumAdapter", function () {
         expect(topic.status).to.equal(Status.APPROVED);
 
     });
+       
 });

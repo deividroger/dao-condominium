@@ -9,6 +9,7 @@ contract Condominium is ICondominium {
 
 
     address public manager;
+    uint public montlyQuota = 0.01 ether;
     
     mapping (uint16 => bool) residences; //unidades
 
@@ -63,10 +64,6 @@ contract Condominium is ICondominium {
         require(!counselors[resident],"A counselor cannot be removed");
 
         delete residents[resident];
-
-        if(counselors[resident]){
-            delete counselors[resident];
-        }
     }
 
     function setCounselor(address resident, bool isEntering) external onlyManager {
@@ -88,8 +85,11 @@ contract Condominium is ICondominium {
         return getTopic(title).createdDate > 0;
     }
 
-    function addTopic(string memory title, string memory description) external onlyResident{
+    function addTopic(string memory title, string memory description, Lib.Category category, uint amount, address responsible) external onlyResident{
         require(!topicExists(title),"This topic already exists");
+        if (amount > 0) {
+            require(category == Lib.Category.CHANGE_QUOTA || category == Lib.Category.SPENT,"Wrong category");
+        }
         
         Lib.Topic memory newTopic = Lib.Topic({
            title: title,
@@ -97,7 +97,11 @@ contract Condominium is ICondominium {
            createdDate:  block.timestamp,
            startDate: 0,
            endDate: 0,
-           status: Lib.Status.IDLE
+           status: Lib.Status.IDLE,
+           category: category,
+           amount: amount,
+           responsible: responsible != address(0) ? responsible : tx.origin
+           
         });
         
         topics[keccak256(bytes(title))] = newTopic;
@@ -135,7 +139,7 @@ contract Condominium is ICondominium {
 
         for (uint8 i = 0; i < votes.length; i++) {
             if (votes[i].residence == residence) {
-                require(false, "A residence should vote only once");
+                require(votes[i].residence != residence, "A residence should vote only once");
             }
         }
 
@@ -146,7 +150,7 @@ contract Condominium is ICondominium {
             timestamp: block.timestamp
 
         });
-
+    
         votings[topicId].push(newVote);
 
     }
@@ -155,6 +159,18 @@ contract Condominium is ICondominium {
         Lib.Topic memory topic = getTopic(title);
         require(topic.createdDate > 0,"The topic does not exists");
         require(topic.status == Lib.Status.VOTING, "Only VOTING topics can be closed");
+
+        uint8 mininumVotes = 5;
+
+        if(topic.category == Lib.Category.SPENT){
+            mininumVotes = 10;
+        }else if (topic.category == Lib.Category.CHANGE_MANAGER) {
+            mininumVotes = 15;
+        }else if (topic.category == Lib.Category.CHANGE_QUOTA) {
+            mininumVotes = 20;
+        }
+
+        require(numbersOfVotes(title) >= mininumVotes,"You cannot finish a voting without the minimum votes");
 
         uint8 approved = 0;
         uint8 denied = 0;
@@ -165,6 +181,11 @@ contract Condominium is ICondominium {
         Lib.Vote[] memory votes =  votings[topicId];
 
           for (uint8 i = 0; i < votes.length; i++) {
+            
+            if (votes[i].option == Lib.Options.ABSTENTION) {
+                abstentions++;
+            }
+            
             if (votes[i].option == Lib.Options.YES) {
                 approved++;
             }
@@ -172,22 +193,23 @@ contract Condominium is ICondominium {
             if (votes[i].option == Lib.Options.NO) {
                 denied++;
             }
-
-            if (votes[i].option == Lib.Options.ABSTENTION) {
-                abstentions++;
-            }
         }  
 
-        if (approved > denied) {
-            topics[topicId].status = Lib.Status.APPROVED;
-        }else {
-            topics[topicId].status = Lib.Status.DENIED;
-        }
-
+        Lib.Status newStatus = approved > denied ? Lib.Status.APPROVED : Lib.Status.DENIED;
+        topics[topicId].status =  newStatus;
         topics[topicId].endDate = block.timestamp;
+
+        if(newStatus == Lib.Status.APPROVED){
+            if (topic.category == Lib.Category.CHANGE_QUOTA) {
+                montlyQuota =   topic.amount;
+            }
+            if (topic.category == Lib.Category.CHANGE_MANAGER) {
+                manager = topic.responsible;
+            }
+        }
     }
 
-    function numbersOfVotes(string memory title) external view returns(uint256){
+    function numbersOfVotes(string memory title) public view returns(uint256){
         bytes32 topicId= keccak256(bytes(title));
 
         return votings[topicId].length;

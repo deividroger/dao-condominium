@@ -25,26 +25,35 @@ export declare namespace CondominiumLib {
   export type TopicStruct = {
     title: string;
     description: string;
+    category: BigNumberish;
     status: BigNumberish;
     createdDate: BigNumberish;
     startDate: BigNumberish;
     endDate: BigNumberish;
+    amount: BigNumberish;
+    responsible: AddressLike;
   };
 
   export type TopicStructOutput = [
     title: string,
     description: string,
+    category: bigint,
     status: bigint,
     createdDate: bigint,
     startDate: bigint,
-    endDate: bigint
+    endDate: bigint,
+    amount: bigint,
+    responsible: string
   ] & {
     title: string;
     description: string;
+    category: bigint;
     status: bigint;
     createdDate: bigint;
     startDate: bigint;
     endDate: bigint;
+    amount: bigint;
+    responsible: string;
   };
 }
 
@@ -58,6 +67,7 @@ export interface CondominiumInterface extends Interface {
       | "getTopic"
       | "isResident"
       | "manager"
+      | "montlyQuota"
       | "numbersOfVotes"
       | "openVoting"
       | "removeResident"
@@ -75,7 +85,7 @@ export interface CondominiumInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addTopic",
-    values: [string, string]
+    values: [string, string, BigNumberish, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "closeVoting", values: [string]): string;
   encodeFunctionData(
@@ -88,6 +98,10 @@ export interface CondominiumInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "manager", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "montlyQuota",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "numbersOfVotes",
     values: [string]
@@ -126,6 +140,10 @@ export interface CondominiumInterface extends Interface {
   decodeFunctionResult(functionFragment: "getTopic", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isResident", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "montlyQuota",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "numbersOfVotes",
     data: BytesLike
@@ -205,7 +223,13 @@ export interface Condominium extends BaseContract {
   >;
 
   addTopic: TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      category: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -223,6 +247,8 @@ export interface Condominium extends BaseContract {
   isResident: TypedContractMethod<[resident: AddressLike], [boolean], "view">;
 
   manager: TypedContractMethod<[], [string], "view">;
+
+  montlyQuota: TypedContractMethod<[], [bigint], "view">;
 
   numbersOfVotes: TypedContractMethod<[title: string], [bigint], "view">;
 
@@ -253,13 +279,26 @@ export interface Condominium extends BaseContract {
   topics: TypedContractMethod<
     [arg0: BytesLike],
     [
-      [string, string, bigint, bigint, bigint, bigint] & {
+      [
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        string
+      ] & {
         title: string;
         description: string;
+        category: bigint;
         status: bigint;
         createdDate: bigint;
         startDate: bigint;
         endDate: bigint;
+        amount: bigint;
+        responsible: string;
       }
     ],
     "view"
@@ -285,7 +324,13 @@ export interface Condominium extends BaseContract {
   getFunction(
     nameOrSignature: "addTopic"
   ): TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      category: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -308,6 +353,9 @@ export interface Condominium extends BaseContract {
   getFunction(
     nameOrSignature: "manager"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "montlyQuota"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "numbersOfVotes"
   ): TypedContractMethod<[title: string], [bigint], "view">;
@@ -338,13 +386,26 @@ export interface Condominium extends BaseContract {
   ): TypedContractMethod<
     [arg0: BytesLike],
     [
-      [string, string, bigint, bigint, bigint, bigint] & {
+      [
+        string,
+        string,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        string
+      ] & {
         title: string;
         description: string;
+        category: bigint;
         status: bigint;
         createdDate: bigint;
         startDate: bigint;
         endDate: bigint;
+        amount: bigint;
+        responsible: string;
       }
     ],
     "view"

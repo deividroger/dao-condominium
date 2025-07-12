@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "hbenl.vscode-jasmine-test-adapter",
+        "hbenl.vscode-test-explorer",
+        "hbenl.vscode-mocha-test-adapter"
+    ]
+}

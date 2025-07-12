@@ -43,7 +43,7 @@ export interface CondominiumAdapterInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addTopic",
-    values: [string, string]
+    values: [string, string, BigNumberish, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "closeVoting", values: [string]): string;
   encodeFunctionData(
@@ -151,7 +151,13 @@ export interface CondominiumAdapter extends BaseContract {
   >;
 
   addTopic: TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      category: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -204,7 +210,13 @@ export interface CondominiumAdapter extends BaseContract {
   getFunction(
     nameOrSignature: "addTopic"
   ): TypedContractMethod<
-    [title: string, description: string],
+    [
+      title: string,
+      description: string,
+      category: BigNumberish,
+      amount: BigNumberish,
+      responsible: AddressLike
+    ],
     [void],
     "nonpayable"
   >;

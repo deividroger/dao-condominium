@@ -9,6 +9,7 @@
 	
   "remoteUser": "node",
   "extensions": [
-	"nomicfoundation.hardhat-solidity"
-  ],
+	"nomicfoundation.hardhat-solidity",
+	"hbenl.vscode-mocha-test-adapter"
+],
 }
