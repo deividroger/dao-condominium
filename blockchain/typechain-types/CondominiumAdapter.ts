@@ -31,6 +31,7 @@ export interface CondominiumAdapterInterface extends Interface {
       | "getImplAddress"
       | "openVoting"
       | "owner"
+      | "payQuota"
       | "removeResident"
       | "removeTopic"
       | "setCounselor"
@@ -57,6 +58,10 @@ export interface CondominiumAdapterInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "openVoting", values: [string]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "payQuota",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "removeResident",
     values: [AddressLike]
@@ -91,6 +96,7 @@ export interface CondominiumAdapterInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "openVoting", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "payQuota", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removeResident",
     data: BytesLike
@@ -187,6 +193,8 @@ export interface CondominiumAdapter extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
+  payQuota: TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
+
   removeResident: TypedContractMethod<
     [resident: AddressLike],
     [void],
@@ -261,6 +269,9 @@ export interface CondominiumAdapter extends BaseContract {
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "payQuota"
+  ): TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
   getFunction(
     nameOrSignature: "removeResident"
   ): TypedContractMethod<[resident: AddressLike], [void], "nonpayable">;

@@ -114,6 +114,19 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "uint16",
+        name: "residenseId",
+        type: "uint16",
+      },
+    ],
+    name: "payQuota",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "resident",
         type: "address",

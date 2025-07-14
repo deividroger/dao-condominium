@@ -29,6 +29,7 @@ export interface ICondominiumInterface extends Interface {
       | "closeVoting"
       | "editTopic"
       | "openVoting"
+      | "payQuota"
       | "removeResident"
       | "removeTopic"
       | "setCounselor"
@@ -49,6 +50,10 @@ export interface ICondominiumInterface extends Interface {
     values: [string, string, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "openVoting", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "payQuota",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "removeResident",
     values: [AddressLike]
@@ -74,6 +79,7 @@ export interface ICondominiumInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "editTopic", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "openVoting", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "payQuota", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "removeResident",
     data: BytesLike
@@ -165,6 +171,8 @@ export interface ICondominium extends BaseContract {
 
   openVoting: TypedContractMethod<[title: string], [void], "nonpayable">;
 
+  payQuota: TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
+
   removeResident: TypedContractMethod<
     [resident: AddressLike],
     [void],
@@ -227,6 +235,9 @@ export interface ICondominium extends BaseContract {
   getFunction(
     nameOrSignature: "openVoting"
   ): TypedContractMethod<[title: string], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "payQuota"
+  ): TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
   getFunction(
     nameOrSignature: "removeResident"
   ): TypedContractMethod<[resident: AddressLike], [void], "nonpayable">;

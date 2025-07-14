@@ -1,7 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { SignerWithAddress } from '@nomicfoundation/hardhat-ethers/signers';
 import { expect } from "chai";
-import hre from "hardhat";
+import hre, { ethers } from "hardhat";
 import { Options } from './shared/Options';
 import { Status } from './shared/status';
 import { Category } from "./shared/category";
@@ -24,8 +24,13 @@ describe("CondominiumAdapter", function () {
                 (100 * Math.ceil(i / 5)) +
                 (i - (5 * Math.floor((i - 1) / 5)))
 
-            await adapter.addResident(accounts[i - 1].address, residenceId);
+            await addResidentPayingQuota(adapter, accounts[i - 1], residenceId);
         }
+    }
+    async function addResidentPayingQuota(adapter: CondominiumAdapter, account: SignerWithAddress,residenceId: number) {
+            await adapter.addResident(account.address, residenceId);
+            const instance = adapter.connect(account);
+            await instance.payQuota(residenceId, { value: ethers.parseEther("0.01") });
     }
 
     async function deployAdapterFixture() {
@@ -72,6 +77,12 @@ describe("CondominiumAdapter", function () {
 
     });
 
+     it("Should NOT upgrade (address)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+    
+        await expect(adapter.upgrade(ethers.ZeroAddress)).to.be.revertedWith("Invald address");
+
+    });
 
     it("Should add resident", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
@@ -87,10 +98,10 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should NOT add resident(not upgrade)", async function () {
+    it("Should NOT add resident(not upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
 
-        await expect( adapter.addResident(accounts[1].address, 1301)).to.be.revertedWith("You must upgrade first");
+        await expect(adapter.addResident(accounts[1].address, 1301)).to.be.revertedWith("You must upgrade first");
 
     });
 
@@ -111,7 +122,7 @@ describe("CondominiumAdapter", function () {
 
     it("Should not remove resident (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
+
         await expect(adapter.removeResident(accounts[1].address)).to.be.revertedWith("You must upgrade first");
 
     });
@@ -132,7 +143,7 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should not set couselor (upgrade)", async function () {
+    it("Should not set couselor (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
 
         await expect(adapter.setCounselor(accounts[1].address, true)).to.revertedWith("You must upgrade first");
@@ -153,9 +164,9 @@ describe("CondominiumAdapter", function () {
 
     });
 
-       it("Should NOT add topic (upgrade)", async function () {
+    it("Should NOT add topic (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
+
         await expect(adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address)).to.revertedWith("You must upgrade first");
 
     });
@@ -178,9 +189,9 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should NOT edit topic (upgrade)", async function () {
+    it("Should NOT edit topic (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
+
         await expect(adapter.editTopic("topic 1", "new description", 2, manager.address)).to.be.revertedWith("You must upgrade first");
 
     });
@@ -247,7 +258,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.openVoting("topic 1");
 
-        await adapter.addResident(accounts[1].address, 1301);
+        await addResidentPayingQuota(adapter,accounts[1],1301);
         const instance = adapter.connect(accounts[1]);
 
         await instance.vote('topic 1', Options.YES);
@@ -258,15 +269,15 @@ describe("CondominiumAdapter", function () {
 
     it("Should NOT VOTE (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
-        await expect(adapter.vote("topic 1",Options.EMPTY)).to.be.revertedWith("You must upgrade first");
+
+        await expect(adapter.vote("topic 1", Options.EMPTY)).to.be.revertedWith("You must upgrade first");
 
     });
-    
+
 
     it("Should NOT open VOTE (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
+
         await expect(adapter.openVoting("topic 1")).to.be.revertedWith("You must upgrade first");
 
     });
@@ -295,10 +306,17 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should NOT close voting (upgrade)", async function () {
+    it("Should NOT close voting (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-        
+
         await expect(adapter.closeVoting("topic 1")).to.be.revertedWith("You must upgrade first");
+
+    });
+
+    it("Should NOT payQuota (upgrade)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+
+        await expect(adapter.payQuota(1022,{value: ethers.parseEther("0.02")})).to.be.revertedWith("You must upgrade first");
 
     });
 

@@ -19,6 +19,8 @@ contract Condominium is ICondominium {
 
     mapping(bytes32 => Lib.Vote[]) votings;
 
+    mapping(uint16 => uint) public payments;
+
     constructor() {
         manager = msg.sender;
 
@@ -49,6 +51,13 @@ contract Condominium is ICondominium {
         require(
             tx.origin == manager || isResident(tx.origin),
             "Only the manager or residents can do this"
+        );
+
+        require(
+            tx.origin == manager ||
+                block.timestamp <
+                payments[residents[tx.origin]] + (30 * 24 * 60 * 60),
+            "The resident must be a defaulter"
         );
         _;
     }
@@ -157,7 +166,7 @@ contract Condominium is ICondominium {
         if (amount > 0) {
             topics[topicId].amount = amount;
         }
-        
+
         if (responsible != address(0)) {
             topics[topicId].responsible = responsible;
         }
@@ -207,9 +216,9 @@ contract Condominium is ICondominium {
 
         for (uint8 i = 0; i < votes.length; i++) {
             require(
-                    votes[i].residence != residence,
-                    "A residence should vote only once"
-                );
+                votes[i].residence != residence,
+                "A residence should vote only once"
+            );
         }
 
         Lib.Vote memory newVote = Lib.Vote({
@@ -287,5 +296,16 @@ contract Condominium is ICondominium {
         bytes32 topicId = keccak256(bytes(title));
 
         return votings[topicId].length;
+    }
+
+    function payQuota(uint16 residenseId) external payable {
+        require(residenceExists(residenseId), "The resident does not exists");
+        require(msg.value >= montlyQuota, "Wrong value");
+        require(
+            block.timestamp >= payments[residenseId] + (30 * 24 * 60 * 60),
+            "You cannot pay twice a month"
+        );
+
+        payments[residenseId] = block.timestamp;
     }
 }
