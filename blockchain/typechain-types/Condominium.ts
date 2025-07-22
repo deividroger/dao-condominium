@@ -79,6 +79,7 @@ export interface CondominiumInterface extends Interface {
       | "setCounselor"
       | "topicExists"
       | "topics"
+      | "transfer"
       | "vote"
   ): FunctionFragment;
 
@@ -138,6 +139,10 @@ export interface CondominiumInterface extends Interface {
   encodeFunctionData(functionFragment: "topicExists", values: [string]): string;
   encodeFunctionData(functionFragment: "topics", values: [BytesLike]): string;
   encodeFunctionData(
+    functionFragment: "transfer",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "vote",
     values: [string, BigNumberish]
   ): string;
@@ -188,6 +193,7 @@ export interface CondominiumInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "topics", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
 }
 
@@ -337,6 +343,12 @@ export interface Condominium extends BaseContract {
     "view"
   >;
 
+  transfer: TypedContractMethod<
+    [topicTitle: string, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   vote: TypedContractMethod<
     [title: string, option: BigNumberish],
     [void],
@@ -460,6 +472,13 @@ export interface Condominium extends BaseContract {
       }
     ],
     "view"
+  >;
+  getFunction(
+    nameOrSignature: "transfer"
+  ): TypedContractMethod<
+    [topicTitle: string, amount: BigNumberish],
+    [void],
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "vote"

@@ -172,6 +172,24 @@ const _abi = [
     inputs: [
       {
         internalType: "string",
+        name: "topicTitle",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "transfer",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
         name: "title",
         type: "string",
       },

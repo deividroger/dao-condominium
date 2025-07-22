@@ -35,6 +35,7 @@ export interface CondominiumAdapterInterface extends Interface {
       | "removeResident"
       | "removeTopic"
       | "setCounselor"
+      | "transfer"
       | "upgrade"
       | "vote"
   ): FunctionFragment;
@@ -70,6 +71,10 @@ export interface CondominiumAdapterInterface extends Interface {
   encodeFunctionData(
     functionFragment: "setCounselor",
     values: [AddressLike, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transfer",
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "upgrade",
@@ -109,6 +114,7 @@ export interface CondominiumAdapterInterface extends Interface {
     functionFragment: "setCounselor",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "upgrade", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
 }
@@ -209,6 +215,12 @@ export interface CondominiumAdapter extends BaseContract {
     "nonpayable"
   >;
 
+  transfer: TypedContractMethod<
+    [topicTitle: string, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   upgrade: TypedContractMethod<
     [newImplementation: AddressLike],
     [void],
@@ -282,6 +294,13 @@ export interface CondominiumAdapter extends BaseContract {
     nameOrSignature: "setCounselor"
   ): TypedContractMethod<
     [resident: AddressLike, isEntering: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "transfer"
+  ): TypedContractMethod<
+    [topicTitle: string, amount: BigNumberish],
     [void],
     "nonpayable"
   >;

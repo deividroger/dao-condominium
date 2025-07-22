@@ -4,7 +4,6 @@ pragma solidity ^0.8.28;
 import {CondominiumLib as Lib} from './CondominiumLib.sol';
 
 interface ICondominium {
-
     function addResident(address resident, uint16 residenceId) external;
     function removeResident(address resident) external;
     function setCounselor(address resident, bool isEntering) external;
@@ -15,4 +14,5 @@ interface ICondominium {
     function vote(string memory title, Lib.Options option) external;
     function closeVoting(string memory title) external;
     function payQuota(uint16 residenseId) external payable;
+    function transfer(string memory topicTitle, uint amount) external;
 }

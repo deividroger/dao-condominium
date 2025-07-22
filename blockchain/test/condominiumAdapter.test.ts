@@ -27,10 +27,10 @@ describe("CondominiumAdapter", function () {
             await addResidentPayingQuota(adapter, accounts[i - 1], residenceId);
         }
     }
-    async function addResidentPayingQuota(adapter: CondominiumAdapter, account: SignerWithAddress,residenceId: number) {
-            await adapter.addResident(account.address, residenceId);
-            const instance = adapter.connect(account);
-            await instance.payQuota(residenceId, { value: ethers.parseEther("0.01") });
+    async function addResidentPayingQuota(adapter: CondominiumAdapter, account: SignerWithAddress, residenceId: number) {
+        await adapter.addResident(account.address, residenceId);
+        const instance = adapter.connect(account);
+        await instance.payQuota(residenceId, { value: ethers.parseEther("0.01") });
     }
 
     async function deployAdapterFixture() {
@@ -77,9 +77,9 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should NOT upgrade (address)", async function () {
+    it("Should NOT upgrade (address)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
-    
+
         await expect(adapter.upgrade(ethers.ZeroAddress)).to.be.revertedWith("Invald address");
 
     });
@@ -258,7 +258,7 @@ describe("CondominiumAdapter", function () {
 
         await adapter.openVoting("topic 1");
 
-        await addResidentPayingQuota(adapter,accounts[1],1301);
+        await addResidentPayingQuota(adapter, accounts[1], 1301);
         const instance = adapter.connect(accounts[1]);
 
         await instance.vote('topic 1', Options.YES);
@@ -316,8 +316,49 @@ describe("CondominiumAdapter", function () {
     it("Should NOT payQuota (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
 
-        await expect(adapter.payQuota(1022,{value: ethers.parseEther("0.02")})).to.be.revertedWith("You must upgrade first");
+        await expect(adapter.payQuota(1022, { value: ethers.parseEther("0.02") })).to.be.revertedWith("You must upgrade first");
 
+    });
+
+    it("Should transfer", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        await adapter.addTopic("topic 1", "description 1", Category.SPENT, 100, accounts[1].address);
+
+        await adapter.openVoting("topic 1");
+
+        await addResidents(adapter, 10, accounts);
+
+        await addVotes(adapter, 10, accounts, "topic 1");
+
+        await adapter.closeVoting("topic 1");
+
+        const balanceBefore = await ethers.provider.getBalance(contractAddress);
+
+        const balanceWorkerBefore = await ethers.provider.getBalance(accounts[1].address);
+
+        await adapter.transfer("topic 1", 100);
+
+        const balanceAfter = await ethers.provider.getBalance(contractAddress);
+        const balanceWorkerAfer = await ethers.provider.getBalance(accounts[1].address);
+
+        const topic = await contract.getTopic("topic 1");
+
+        expect(balanceAfter).to.equal(balanceBefore - 100n);
+        expect(balanceWorkerAfer).to.equal(balanceWorkerBefore + 100n);
+
+        expect(topic.status).to.equal(Status.SPENT);
+
+    });
+
+     it("Should NOT transfer (upgrade)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        await expect(adapter.transfer("topic 1", 100)).to.be.revertedWith("You must upgrade first");
     });
 
 });
