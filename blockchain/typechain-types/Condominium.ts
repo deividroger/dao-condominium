@@ -22,6 +22,20 @@ import type {
 } from "./common";
 
 export declare namespace CondominiumLib {
+  export type TopicUpdateStruct = {
+    id: BytesLike;
+    title: string;
+    status: BigNumberish;
+    category: BigNumberish;
+  };
+
+  export type TopicUpdateStructOutput = [
+    id: string,
+    title: string,
+    status: bigint,
+    category: bigint
+  ] & { id: string; title: string; status: bigint; category: bigint };
+
   export type TopicStruct = {
     title: string;
     description: string;
@@ -55,6 +69,18 @@ export declare namespace CondominiumLib {
     amount: bigint;
     responsible: string;
   };
+
+  export type TransferReceiptStruct = {
+    to: AddressLike;
+    amount: BigNumberish;
+    topic: string;
+  };
+
+  export type TransferReceiptStructOutput = [
+    to: string,
+    amount: bigint,
+    topic: string
+  ] & { to: string; amount: bigint; topic: string };
 }
 
 export interface CondominiumInterface extends Interface {
@@ -65,6 +91,8 @@ export interface CondominiumInterface extends Interface {
       | "closeVoting"
       | "counselors"
       | "editTopic"
+      | "getManager"
+      | "getQuota"
       | "getTopic"
       | "isResident"
       | "manager"
@@ -100,6 +128,11 @@ export interface CondominiumInterface extends Interface {
     functionFragment: "editTopic",
     values: [string, string, BigNumberish, AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "getManager",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "getQuota", values?: undefined): string;
   encodeFunctionData(functionFragment: "getTopic", values: [string]): string;
   encodeFunctionData(
     functionFragment: "isResident",
@@ -158,6 +191,8 @@ export interface CondominiumInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "counselors", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "editTopic", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getManager", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getQuota", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getTopic", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isResident", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "manager", data: BytesLike): Result;
@@ -258,7 +293,11 @@ export interface Condominium extends BaseContract {
     "nonpayable"
   >;
 
-  closeVoting: TypedContractMethod<[title: string], [void], "nonpayable">;
+  closeVoting: TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
 
   counselors: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
@@ -269,9 +308,13 @@ export interface Condominium extends BaseContract {
       amount: BigNumberish,
       responsible: AddressLike
     ],
-    [void],
+    [CondominiumLib.TopicUpdateStructOutput],
     "nonpayable"
   >;
+
+  getManager: TypedContractMethod<[], [string], "view">;
+
+  getQuota: TypedContractMethod<[], [bigint], "view">;
 
   getTopic: TypedContractMethod<
     [title: string],
@@ -287,7 +330,11 @@ export interface Condominium extends BaseContract {
 
   numbersOfVotes: TypedContractMethod<[title: string], [bigint], "view">;
 
-  openVoting: TypedContractMethod<[title: string], [void], "nonpayable">;
+  openVoting: TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
 
   payQuota: TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
 
@@ -299,7 +346,11 @@ export interface Condominium extends BaseContract {
     "nonpayable"
   >;
 
-  removeTopic: TypedContractMethod<[title: string], [void], "nonpayable">;
+  removeTopic: TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
 
   residenceExists: TypedContractMethod<
     [residenceId: BigNumberish],
@@ -345,7 +396,7 @@ export interface Condominium extends BaseContract {
 
   transfer: TypedContractMethod<
     [topicTitle: string, amount: BigNumberish],
-    [void],
+    [CondominiumLib.TransferReceiptStructOutput],
     "nonpayable"
   >;
 
@@ -381,7 +432,11 @@ export interface Condominium extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "closeVoting"
-  ): TypedContractMethod<[title: string], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "counselors"
   ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
@@ -394,9 +449,15 @@ export interface Condominium extends BaseContract {
       amount: BigNumberish,
       responsible: AddressLike
     ],
-    [void],
+    [CondominiumLib.TopicUpdateStructOutput],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "getManager"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getQuota"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getTopic"
   ): TypedContractMethod<
@@ -418,7 +479,11 @@ export interface Condominium extends BaseContract {
   ): TypedContractMethod<[title: string], [bigint], "view">;
   getFunction(
     nameOrSignature: "openVoting"
-  ): TypedContractMethod<[title: string], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "payQuota"
   ): TypedContractMethod<[residenseId: BigNumberish], [void], "payable">;
@@ -430,7 +495,11 @@ export interface Condominium extends BaseContract {
   ): TypedContractMethod<[resident: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "removeTopic"
-  ): TypedContractMethod<[title: string], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicUpdateStructOutput],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "residenceExists"
   ): TypedContractMethod<[residenceId: BigNumberish], [boolean], "view">;
@@ -477,7 +546,7 @@ export interface Condominium extends BaseContract {
     nameOrSignature: "transfer"
   ): TypedContractMethod<
     [topicTitle: string, amount: BigNumberish],
-    [void],
+    [CondominiumLib.TransferReceiptStructOutput],
     "nonpayable"
   >;
   getFunction(

@@ -7,6 +7,7 @@ library CondominiumLib {
         VOTING,
         APPROVED,
         DENIED,
+        DELETED,
         SPENT
     }
     struct Topic {
@@ -41,4 +42,17 @@ library CondominiumLib {
         Options option;
         uint256 timestamp;
     }
+    struct TopicUpdate {
+        bytes32 id;
+        string title;
+        Status status;
+        Category category;
+
+    }
+
+    struct TransferReceipt {
+        address to;
+        uint amount;
+        string topic;
+    } 
 }

@@ -7,6 +7,15 @@ contract CondominiumAdapter {
     ICondominium private implementation;
     address public immutable owner;
 
+    event QuotaChanged(uint amount);
+    event ManagerChanged(address manager);
+    event TopicChanged(
+        bytes32 indexed topicId,
+        string title,
+        Lib.Status indexed status
+    );
+    event Transfer(address to, uint indexed amount, string topic);
+
     constructor() {
         owner = msg.sender;
     }
@@ -70,21 +79,23 @@ contract CondominiumAdapter {
         uint amount,
         address responsible
     ) external updgraded {
-        return
-            implementation.editTopic(
-                topicToEdit,
-                description,
-                amount,
-                responsible
-            );
+        Lib.TopicUpdate memory topic = implementation.editTopic(
+            topicToEdit,
+            description,
+            amount,
+            responsible
+        );
+        emit TopicChanged(topic.id, topic.title, topic.status);
     }
 
     function removeTopic(string memory title) external updgraded {
-        return implementation.removeTopic(title);
+        Lib.TopicUpdate memory topic = implementation.removeTopic(title);
+        emit TopicChanged(topic.id, topic.title, topic.status);
     }
 
     function openVoting(string memory title) external updgraded {
-        return implementation.openVoting(title);
+        Lib.TopicUpdate memory topic = implementation.openVoting(title);
+        emit TopicChanged(topic.id, topic.title, topic.status);
     }
 
     function vote(string memory title, Lib.Options option) external updgraded {
@@ -92,14 +103,35 @@ contract CondominiumAdapter {
     }
 
     function closeVoting(string memory title) external updgraded {
-        return implementation.closeVoting(title);
+        Lib.TopicUpdate memory topic = implementation.closeVoting(title);
+        emit TopicChanged(topic.id, topic.title, topic.status);
+
+        if (topic.status == Lib.Status.APPROVED) {
+            if (topic.category == Lib.Category.CHANGE_MANAGER) {
+                emit ManagerChanged(implementation.getManager());
+            } else if (topic.category == Lib.Category.CHANGE_QUOTA) {
+                emit QuotaChanged(implementation.getQuota());
+            }
+        }
     }
 
     function payQuota(uint16 residenseId) external payable updgraded {
         return implementation.payQuota{value: msg.value}(residenseId);
     }
 
-   function  transfer(string memory topicTitle, uint amount) external updgraded {
-        return implementation.transfer(topicTitle,amount);
+    function transfer(
+        string memory topicTitle,
+        uint amount
+    ) external updgraded {
+        Lib.TransferReceipt memory transferReceipt = implementation.transfer(
+            topicTitle,
+            amount
+        );
+
+        emit Transfer(
+            transferReceipt.to,
+            transferReceipt.amount,
+            transferReceipt.topic
+        );
     }
 }

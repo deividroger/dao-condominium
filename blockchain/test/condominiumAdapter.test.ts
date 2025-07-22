@@ -9,10 +9,10 @@ import { CondominiumAdapter } from "../typechain-types";
 
 describe("CondominiumAdapter", function () {
 
-    async function addVotes(adapter: CondominiumAdapter, count: number, accounts: SignerWithAddress[], topicName: string) {
+    async function addVotes(adapter: CondominiumAdapter, count: number, accounts: SignerWithAddress[], topicName: string, option: Options = Options.YES) {
         for (let i = 1; i <= count; i++) {
             const instance = adapter.connect(accounts[i - 1]);
-            await instance.vote(topicName, Options.YES);
+            await instance.vote(topicName, option);
 
         }
     }
@@ -35,7 +35,6 @@ describe("CondominiumAdapter", function () {
 
     async function deployAdapterFixture() {
 
-        // Contracts are deployed using the first signer/account by default
         const accounts = await hre.ethers.getSigners();
         const manager = accounts[0];
 
@@ -282,7 +281,7 @@ describe("CondominiumAdapter", function () {
 
     });
 
-    it("Should close voting", async function () {
+    it("Should close voting (decision approved)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
         const { contract } = await loadFixture(deployImplementationFixture);
 
@@ -298,11 +297,33 @@ describe("CondominiumAdapter", function () {
 
         await addVotes(adapter, 5, accounts, "topic 1");
 
-        await adapter.closeVoting("topic 1");
+    
+        await expect( adapter.closeVoting("topic 1")).to.emit(adapter,"TopicChanged");
 
         const topic = await contract.getTopic("topic 1");
-
         expect(topic.status).to.equal(Status.APPROVED);
+
+    });
+
+    it("Should close voting (decision denied)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        await adapter.addTopic("topic 1", "description 1", Category.DECISION, 0, manager.address);
+
+        await adapter.openVoting("topic 1");
+
+        await addResidents(adapter, 5, accounts);
+
+        await addVotes(adapter, 5, accounts, "topic 1",Options.NO);
+
+        await expect( adapter.closeVoting("topic 1")).to.emit(adapter,"TopicChanged");
+        const topic = await contract.getTopic("topic 1");
+        expect(topic.status).to.equal(Status.DENIED);
 
     });
 
@@ -356,9 +377,49 @@ describe("CondominiumAdapter", function () {
 
     });
 
-     it("Should NOT transfer (upgrade)", async function () {
+    it("Should NOT transfer (upgrade)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
         await expect(adapter.transfer("topic 1", 100)).to.be.revertedWith("You must upgrade first");
     });
 
+
+    it("Should close voting (change_manager)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        await adapter.addTopic("topic 1", "description 1", Category.CHANGE_MANAGER, 0, accounts[1].address);
+
+        await adapter.openVoting("topic 1");
+
+        await addResidents(adapter, 15, accounts);
+
+        await addVotes(adapter, 15, accounts, "topic 1");
+
+        await expect(adapter.closeVoting("topic 1")).to.emit(adapter, "ManagerChanged").withArgs(accounts[1].address);
+    });
+
+
+    
+    it("Should close voting (quota_changed)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        await adapter.addTopic("topic 1", "description 1", Category.CHANGE_QUOTA, 100, manager.address);
+
+        await adapter.openVoting("topic 1");
+
+        await addResidents(adapter, 20, accounts);
+
+        await addVotes(adapter, 20, accounts, "topic 1");
+
+        await expect(adapter.closeVoting("topic 1")).to.emit(adapter, "QuotaChanged").withArgs(100);
+    });
 });
