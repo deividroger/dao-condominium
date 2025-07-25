@@ -5,14 +5,21 @@
   "scripts": {
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
-    "test-coverage": "npx hardhat coverage"
+    "test-coverage": "npx hardhat coverage",
+    "deploy:local": "npx hardhat run scripts/deploy.ts --network local",
+    "deploy:bsctest": "npx hardhat run scripts/deploy.ts --network bsctest",
+    "verify:contract": "npx hardhat verify --network bsctest "
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^17.2.1",
     "hardhat": "^2.23.0",
     "solidity-coverage": "^0.8.16"
+  },
+  "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.1.8"
   }
 }
