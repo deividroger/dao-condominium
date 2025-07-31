@@ -31,6 +31,8 @@ export interface CondominiumAdapterInterface extends Interface {
       | "closeVoting"
       | "editTopic"
       | "getImplAddress"
+      | "getManager"
+      | "getQuota"
       | "openVoting"
       | "owner"
       | "payQuota"
@@ -67,6 +69,11 @@ export interface CondominiumAdapterInterface extends Interface {
     functionFragment: "getImplAddress",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "getManager",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "getQuota", values?: undefined): string;
   encodeFunctionData(functionFragment: "openVoting", values: [string]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -109,6 +116,8 @@ export interface CondominiumAdapterInterface extends Interface {
     functionFragment: "getImplAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getManager", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getQuota", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "openVoting", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "payQuota", data: BytesLike): Result;
@@ -265,6 +274,10 @@ export interface CondominiumAdapter extends BaseContract {
 
   getImplAddress: TypedContractMethod<[], [string], "view">;
 
+  getManager: TypedContractMethod<[], [string], "view">;
+
+  getQuota: TypedContractMethod<[], [bigint], "view">;
+
   openVoting: TypedContractMethod<[title: string], [void], "nonpayable">;
 
   owner: TypedContractMethod<[], [string], "view">;
@@ -345,6 +358,12 @@ export interface CondominiumAdapter extends BaseContract {
   getFunction(
     nameOrSignature: "getImplAddress"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getManager"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getQuota"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "openVoting"
   ): TypedContractMethod<[title: string], [void], "nonpayable">;

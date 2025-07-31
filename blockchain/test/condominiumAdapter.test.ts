@@ -422,4 +422,44 @@ describe("CondominiumAdapter", function () {
 
         await expect(adapter.closeVoting("topic 1")).to.emit(adapter, "QuotaChanged").withArgs(100);
     });
+
+    it("Should get manager", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        const currentManager = await adapter.getManager();
+        
+        expect(currentManager).to.equal(manager.address);
+    });
+
+    it("Should NOT get manager (upgrade)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        await expect(adapter.getManager()).to.be.revertedWith("You must upgrade first"); 
+    });
+
+    it("Should get quota", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        const currentQuota = await adapter.getQuota();
+        
+        expect(currentQuota).to.equal(await contract.getQuota());
+    });
+
+    it("Should NOT get quota (upgrade)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        await expect(adapter.getQuota()).to.be.revertedWith("You must upgrade first"); 
+    });
 });
