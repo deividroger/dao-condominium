@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test",
+    "test": "npm run compile && npm run test-coverage",
     "compile": "npx hardhat compile",
     "test-coverage": "npx hardhat coverage",
     "deploy:local": "npx hardhat run scripts/deploy.ts --network local",

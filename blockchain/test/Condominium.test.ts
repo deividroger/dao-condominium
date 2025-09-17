@@ -131,8 +131,13 @@ describe("Condominium", function () {
     const instance = contract.connect(accounts[1]);
     await instance.addResident(accounts[2].address, 2103);
 
-    expect(await contract.counselors(accounts[1].address)).to.equal(true);
-    expect(await contract.isResident(accounts[2].address)).to.equal(true);
+
+    const resident = await contract.getResident(accounts[1].address);
+    expect(resident.isCounselour).to.equal(true);
+
+    const resident2 = await contract.getResident(accounts[2].address);
+    expect(resident2.isCounselour).to.equal(false);
+
   });
 
   it("Should NOT set Counselor (invalid address)", async function () {
@@ -151,8 +156,8 @@ describe("Condominium", function () {
 
     await contract.setCounselor(accounts[1].address, false);
 
-    expect(await contract.counselors(accounts[1])).to.equal(false);
-
+    const resident = await contract.getResident(accounts[1].address);
+    expect(resident.isCounselour).to.equal(false);
   });
 
 
@@ -175,12 +180,12 @@ describe("Condominium", function () {
   it("change manager", async function () {
     const { contract, manager, accounts } = await loadFixture(deployFixture);
 
+    await addResidents(contract, 15, accounts);
+
     await contract.addTopic("topic", "description 1", Category.CHANGE_MANAGER, 0, accounts[1].address);
     await contract.openVoting('topic');
 
-    await contract.vote('topic', Options.YES);
 
-    await addResidents(contract, 15, accounts);
     await addVotes(contract, 15, accounts, 'topic');
 
     await contract.closeVoting('topic');
@@ -188,16 +193,16 @@ describe("Condominium", function () {
     expect(await contract.manager()).to.equal(accounts[1].address);
   });
 
+
+
   it("change quota", async function () {
     const { contract, manager, accounts } = await loadFixture(deployFixture);
 
+    await addResidents(contract, 20, accounts);
     const newQuotaValue = ethers.parseEther("0.02");
     await contract.addTopic("topic", "description 1", Category.CHANGE_QUOTA, newQuotaValue, manager.address);
     await contract.openVoting('topic');
 
-    await contract.vote('topic', Options.YES);
-
-    await addResidents(contract, 20, accounts);
     await addVotes(contract, 20, accounts, 'topic');
 
     await contract.closeVoting('topic');
@@ -472,12 +477,10 @@ describe("Condominium", function () {
   it("Should close voting", async function () {
     const { contract, manager, accounts } = await loadFixture(deployFixture);
 
+    await addResidents(contract, 5, accounts);
     await contract.addTopic("topic", "description 1", Category.DECISION, 0, manager.address);
     await contract.openVoting('topic');
 
-    await contract.vote('topic', Options.YES);
-
-    await addResidents(contract, 5, accounts);
     await addVotes(contract, 5, accounts, 'topic', Options.NO);
 
     await contract.closeVoting('topic');

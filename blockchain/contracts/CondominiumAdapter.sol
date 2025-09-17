@@ -142,4 +142,24 @@ contract CondominiumAdapter {
     function getQuota() external view updgraded returns (uint) {
         return implementation.getQuota();
     }
+
+    function getResident(address resident) external view updgraded returns(Lib.Resident memory) {
+        return implementation.getResident(resident);
+    }
+
+    function getResidents(uint page, uint pageSize) external view updgraded returns(Lib.ResidentPage memory) {
+        return implementation.getResidents(page,pageSize);
+    }
+
+    function getTopic(string memory title) external view updgraded returns(Lib.Topic memory) {
+        return implementation.getTopic(title);
+    }
+
+    function getTopics(uint page, uint pageSize) external view updgraded returns(Lib.TopicPage memory){
+        return implementation.getTopics(page,pageSize);
+    }
+    
+    function getVotes(string memory topicTitle) external view updgraded returns (Lib.Vote[] memory){
+        return implementation.getVotes(topicTitle);
+    }
 }

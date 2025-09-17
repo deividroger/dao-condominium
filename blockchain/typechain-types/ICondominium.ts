@@ -36,6 +36,101 @@ export declare namespace CondominiumLib {
     category: bigint
   ] & { id: string; title: string; status: bigint; category: bigint };
 
+  export type ResidentStruct = {
+    wallet: AddressLike;
+    residence: BigNumberish;
+    isCounselour: boolean;
+    isManager: boolean;
+    nextPayment: BigNumberish;
+  };
+
+  export type ResidentStructOutput = [
+    wallet: string,
+    residence: bigint,
+    isCounselour: boolean,
+    isManager: boolean,
+    nextPayment: bigint
+  ] & {
+    wallet: string;
+    residence: bigint;
+    isCounselour: boolean;
+    isManager: boolean;
+    nextPayment: bigint;
+  };
+
+  export type ResidentPageStruct = {
+    residents: CondominiumLib.ResidentStruct[];
+    total: BigNumberish;
+  };
+
+  export type ResidentPageStructOutput = [
+    residents: CondominiumLib.ResidentStructOutput[],
+    total: bigint
+  ] & { residents: CondominiumLib.ResidentStructOutput[]; total: bigint };
+
+  export type TopicStruct = {
+    title: string;
+    description: string;
+    category: BigNumberish;
+    status: BigNumberish;
+    createdDate: BigNumberish;
+    startDate: BigNumberish;
+    endDate: BigNumberish;
+    amount: BigNumberish;
+    responsible: AddressLike;
+  };
+
+  export type TopicStructOutput = [
+    title: string,
+    description: string,
+    category: bigint,
+    status: bigint,
+    createdDate: bigint,
+    startDate: bigint,
+    endDate: bigint,
+    amount: bigint,
+    responsible: string
+  ] & {
+    title: string;
+    description: string;
+    category: bigint;
+    status: bigint;
+    createdDate: bigint;
+    startDate: bigint;
+    endDate: bigint;
+    amount: bigint;
+    responsible: string;
+  };
+
+  export type TopicPageStruct = {
+    topics: CondominiumLib.TopicStruct[];
+    total: BigNumberish;
+  };
+
+  export type TopicPageStructOutput = [
+    topics: CondominiumLib.TopicStructOutput[],
+    total: bigint
+  ] & { topics: CondominiumLib.TopicStructOutput[]; total: bigint };
+
+  export type VoteStruct = {
+    resident: AddressLike;
+    residence: BigNumberish;
+    option: BigNumberish;
+    timestamp: BigNumberish;
+  };
+
+  export type VoteStructOutput = [
+    resident: string,
+    residence: bigint,
+    option: bigint,
+    timestamp: bigint
+  ] & {
+    resident: string;
+    residence: bigint;
+    option: bigint;
+    timestamp: bigint;
+  };
+
   export type TransferReceiptStruct = {
     to: AddressLike;
     amount: BigNumberish;
@@ -58,6 +153,11 @@ export interface ICondominiumInterface extends Interface {
       | "editTopic"
       | "getManager"
       | "getQuota"
+      | "getResident"
+      | "getResidents"
+      | "getTopic"
+      | "getTopics"
+      | "getVotes"
       | "openVoting"
       | "payQuota"
       | "removeResident"
@@ -85,6 +185,20 @@ export interface ICondominiumInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "getQuota", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getResident",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getResidents",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "getTopic", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "getTopics",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "getVotes", values: [string]): string;
   encodeFunctionData(functionFragment: "openVoting", values: [string]): string;
   encodeFunctionData(
     functionFragment: "payQuota",
@@ -120,6 +234,17 @@ export interface ICondominiumInterface extends Interface {
   decodeFunctionResult(functionFragment: "editTopic", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getManager", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getQuota", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getResident",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getResidents",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getTopic", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getTopics", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getVotes", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "openVoting", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "payQuota", data: BytesLike): Result;
   decodeFunctionResult(
@@ -220,6 +345,36 @@ export interface ICondominium extends BaseContract {
 
   getQuota: TypedContractMethod<[], [bigint], "view">;
 
+  getResident: TypedContractMethod<
+    [resident: AddressLike],
+    [CondominiumLib.ResidentStructOutput],
+    "view"
+  >;
+
+  getResidents: TypedContractMethod<
+    [page: BigNumberish, pageSize: BigNumberish],
+    [CondominiumLib.ResidentPageStructOutput],
+    "view"
+  >;
+
+  getTopic: TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicStructOutput],
+    "view"
+  >;
+
+  getTopics: TypedContractMethod<
+    [page: BigNumberish, pageSize: BigNumberish],
+    [CondominiumLib.TopicPageStructOutput],
+    "view"
+  >;
+
+  getVotes: TypedContractMethod<
+    [topicTitle: string],
+    [CondominiumLib.VoteStructOutput[]],
+    "view"
+  >;
+
   openVoting: TypedContractMethod<
     [title: string],
     [CondominiumLib.TopicUpdateStructOutput],
@@ -307,6 +462,41 @@ export interface ICondominium extends BaseContract {
   getFunction(
     nameOrSignature: "getQuota"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getResident"
+  ): TypedContractMethod<
+    [resident: AddressLike],
+    [CondominiumLib.ResidentStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getResidents"
+  ): TypedContractMethod<
+    [page: BigNumberish, pageSize: BigNumberish],
+    [CondominiumLib.ResidentPageStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getTopic"
+  ): TypedContractMethod<
+    [title: string],
+    [CondominiumLib.TopicStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getTopics"
+  ): TypedContractMethod<
+    [page: BigNumberish, pageSize: BigNumberish],
+    [CondominiumLib.TopicPageStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getVotes"
+  ): TypedContractMethod<
+    [topicTitle: string],
+    [CondominiumLib.VoteStructOutput[]],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "openVoting"
   ): TypedContractMethod<

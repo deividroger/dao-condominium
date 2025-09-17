@@ -5,7 +5,15 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "solidity-coverage";
 const config: HardhatUserConfig = {
-  solidity: "0.8.28",
+  solidity: {
+    version:"0.8.28",
+    settings:{
+      optimizer: {
+        enabled: true,
+        runs: 1000
+      }
+    }
+  },
   //defaultNetwork: "local",
   networks: {
     local: {

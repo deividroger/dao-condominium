@@ -47,12 +47,29 @@ library CondominiumLib {
         string title;
         Status status;
         Category category;
-
     }
 
     struct TransferReceipt {
         address to;
         uint amount;
         string topic;
-    } 
+    }
+
+    struct Resident {
+        address wallet;
+        uint16 residence;
+        bool isCounselour;
+        bool isManager;
+        uint nextPayment;
+    }
+
+    struct ResidentPage {
+        Resident[] residents;
+        uint total;
+    }
+
+    struct TopicPage {
+        Topic[] topics;
+        uint total;
+    }
 }
