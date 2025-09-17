@@ -204,7 +204,7 @@ const _abi = [
           },
           {
             internalType: "bool",
-            name: "isCounselour",
+            name: "isCounselor",
             type: "bool",
           },
           {
@@ -257,7 +257,7 @@ const _abi = [
               },
               {
                 internalType: "bool",
-                name: "isCounselour",
+                name: "isCounselor",
                 type: "bool",
               },
               {

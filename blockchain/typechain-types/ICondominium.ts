@@ -39,7 +39,7 @@ export declare namespace CondominiumLib {
   export type ResidentStruct = {
     wallet: AddressLike;
     residence: BigNumberish;
-    isCounselour: boolean;
+    isCounselor: boolean;
     isManager: boolean;
     nextPayment: BigNumberish;
   };
@@ -47,13 +47,13 @@ export declare namespace CondominiumLib {
   export type ResidentStructOutput = [
     wallet: string,
     residence: bigint,
-    isCounselour: boolean,
+    isCounselor: boolean,
     isManager: boolean,
     nextPayment: bigint
   ] & {
     wallet: string;
     residence: bigint;
-    isCounselour: boolean;
+    isCounselor: boolean;
     isManager: boolean;
     nextPayment: bigint;
   };

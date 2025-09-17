@@ -27,19 +27,7 @@ contract Condominium is ICondominium {
 
     constructor() {
         manager = msg.sender;
-
         populateResidences(2, 5, 5); // 2 blocks, 5 floors, 5 units
-
-        // for (uint16 i = 1; i <= 2; i++) {
-        //     //blocos
-        //     for (uint16 j = 1; j <= 5; j++) {
-        //         //andares
-        //         for (uint16 k = 1; k <= 5; k++) {
-        //             //unidades
-        //             residences[uint16(i * 1000 + (j * 100) + k)] = true;
-        //         }
-        //     }
-        // }
     }
 
     function populateResidences(
@@ -61,9 +49,9 @@ contract Condominium is ICondominium {
         require(tx.origin == manager, "Only the manager can do this");
         _;
     }
-    modifier onlyCounsil() {
+    modifier onlyCouncil() {
         require(
-            tx.origin == manager || _isCounselour(tx.origin),
+            tx.origin == manager || _isCounselor(tx.origin),
             "Only the manager or the council can do this"
         );
         _;
@@ -102,16 +90,15 @@ contract Condominium is ICondominium {
     function addResident(
         address resident,
         uint16 residenceId
-    ) external onlyCounsil validAddress(resident) {
+    ) external onlyCouncil validAddress(resident) {
         require(residenceExists(residenceId), "This residence does not exist");
         require(!isResident(resident), "This resident already exists");
-
 
         residents.push(
             Lib.Resident({
                 wallet: resident,
                 residence: residenceId,
-                isCounselour: false,
+                isCounselor: false,
                 isManager: resident == manager,
                 nextPayment: 0
             })
@@ -121,7 +108,7 @@ contract Condominium is ICondominium {
     }
 
     function removeResident(address resident) external onlyManager {
-        require(!_isCounselour(resident), "A counselor cannot be removed");
+        require(!_isCounselor(resident), "A counselor cannot be removed");
 
         uint index = _residentIndex[resident];
 
@@ -135,29 +122,24 @@ contract Condominium is ICondominium {
         delete _residentIndex[resident];
     }
 
-    function _isCounselour(address resident) private view returns (bool) {
+    function _isCounselor(address resident) private view returns (bool) {
         for (uint i = 0; i < counselors.length; i++) {
             if (counselors[i] == resident) return true;
         }
         return false;
     }
 
-    function _addCounselour(
-        address counselour
-    ) private onlyManager validAddress(counselour) {
+    function _addCounselor(address counselour) private onlyManager {
         require(isResident(counselour), "The counselor must be a resident");
         counselors.push(counselour);
 
-        residents[_residentIndex[counselour]].isCounselour = true;
+        residents[_residentIndex[counselour]].isCounselor = true;
     }
 
-    function _removeCounselour(
-        address counselour
-    ) private onlyManager validAddress(counselour) {
+    function _removeCounselor(address counselor) private onlyManager {
         uint index = 1000000;
-
-        for (uint i = 0; i <= counselors.length; i++) {
-            if (counselors[i] == counselour) {
+        for (uint i = 0; i < counselors.length; i++) {
+            if (counselors[i] == counselor) {
                 index = i;
                 break;
             }
@@ -170,18 +152,14 @@ contract Condominium is ICondominium {
             counselors[index] = latest;
         }
         counselors.pop();
-
-        residents[_residentIndex[counselour]].isCounselour = false;
+        residents[_residentIndex[counselor]].isCounselor = false;
     }
 
-    function setCounselor(
-        address resident,
-        bool isEntering
-    ) external onlyManager validAddress(resident) {
+    function setCounselor(address resident, bool isEntering) external {
         if (isEntering) {
-            _addCounselour(resident);
+            _addCounselor(resident);
         } else {
-            _removeCounselour(resident);
+            _removeCounselor(resident);
         }
     }
 
@@ -374,7 +352,7 @@ contract Condominium is ICondominium {
         );
 
         uint index = _residentIndex[tx.origin];
-        require(index > 0 || residents[0].wallet == tx.origin, "Resident not found");
+        //require(index > 0 || residents[0].wallet == tx.origin, "Resident not found");
 
         uint16 residence = residents[index].residence;
 
@@ -398,7 +376,7 @@ contract Condominium is ICondominium {
         _votings[topicId].push(newVote);
     }
 
-        function closeVoting(
+    function closeVoting(
         string memory title
     ) external onlyManager returns (Lib.TopicUpdate memory) {
         Lib.Topic memory topic = _getTopic(title);
@@ -442,7 +420,7 @@ contract Condominium is ICondominium {
 
         if (newStatus == Lib.Status.APPROVED) {
             if (topic.category == Lib.Category.CHANGE_QUOTA) {
-            montlyQuota = topic.amount;
+                montlyQuota = topic.amount;
             } else if (topic.category == Lib.Category.CHANGE_MANAGER) {
                 if (isResident(manager))
                     residents[_residentIndex[manager]].isManager = false;
@@ -474,7 +452,7 @@ contract Condominium is ICondominium {
         require(residenceExists(residenseId), "The resident does not exists");
         require(msg.value >= montlyQuota, "Wrong value");
         require(
-            block.timestamp >= _nextPayment[residenseId],  //+ (30 * 24 * 60 * 60),
+            block.timestamp >= _nextPayment[residenseId], //+ (30 * 24 * 60 * 60),
             "You cannot pay twice a month"
         );
 
@@ -544,7 +522,7 @@ contract Condominium is ICondominium {
             Lib.Resident({
                 wallet: address(0),
                 residence: 0,
-                isCounselour: false,
+                isCounselor: false,
                 isManager: false,
                 nextPayment: 0
             });

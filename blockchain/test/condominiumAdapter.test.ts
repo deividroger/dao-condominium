@@ -10,21 +10,25 @@ import { CondominiumAdapter } from "../typechain-types";
 describe("CondominiumAdapter", function () {
 
     async function addVotes(adapter: CondominiumAdapter, count: number, accounts: SignerWithAddress[], topicName: string, option: Options = Options.YES) {
+        const skip = count < 20 ? 0 : 1;
         for (let i = 1; i <= count; i++) {
-            const instance = adapter.connect(accounts[i - 1]);
+            const instance = adapter.connect(accounts[i - skip]);
             await instance.vote(topicName, option);
 
         }
     }
 
     async function addResidents(adapter: CondominiumAdapter, count: number, accounts: SignerWithAddress[]) {
+
+        const skip = count < 20 ? 0 : 1;
+
         for (let i = 1; i <= count; i++) {
 
             const residenceId = (1000 * Math.ceil(i / 25)) +
                 (100 * Math.ceil(i / 5)) +
                 (i - (5 * Math.floor((i - 1) / 5)))
 
-            await addResidentPayingQuota(adapter, accounts[i - 1], residenceId);
+            await addResidentPayingQuota(adapter, accounts[i - skip], residenceId);
         }
     }
     async function addResidentPayingQuota(adapter: CondominiumAdapter, account: SignerWithAddress, residenceId: number) {
@@ -139,7 +143,7 @@ describe("CondominiumAdapter", function () {
         await adapter.setCounselor(accounts[1].address, true);
 
         const resident = await adapter.getResident(accounts[1].address);
-        expect(resident.isCounselour).to.equal(true);
+        expect(resident.isCounselor).to.equal(true);
     });
 
     it("Should not set couselor (upgrade)", async function () {
@@ -382,7 +386,7 @@ describe("CondominiumAdapter", function () {
     });
 
 
-    it("Should close voting (change_manager)", async function () {
+    it("Should close voting (change_manager resident)", async function () {
         const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
         const { contract } = await loadFixture(deployImplementationFixture);
 
@@ -399,6 +403,25 @@ describe("CondominiumAdapter", function () {
         await addVotes(adapter, 15, accounts, "topic 1");
 
         await expect(adapter.closeVoting("topic 1")).to.emit(adapter, "ManagerChanged").withArgs(accounts[1].address);
+    });
+
+    it("Should close voting (change_manager external)", async function () {
+        const { adapter, manager, accounts } = await loadFixture(deployAdapterFixture);
+        const { contract } = await loadFixture(deployImplementationFixture);
+
+        const contractAddress = await contract.getAddress();
+
+        await adapter.upgrade(contractAddress);
+
+        await adapter.addTopic("topic 1", "description 1", Category.CHANGE_MANAGER, 0, contractAddress);
+
+        await adapter.openVoting("topic 1");
+
+        await addResidents(adapter, 15, accounts);
+
+        await addVotes(adapter, 15, accounts, "topic 1");
+
+        await expect(adapter.closeVoting("topic 1")).to.emit(adapter, "ManagerChanged").withArgs(contractAddress);
     });
 
     it("Should close voting (quota_changed)", async function () {
