@@ -1,10 +1,14 @@
+import Sidedar from "../components/Sidebar";
 
 function Topics() {
   return (
+    <>
+    <Sidedar />
     <div>
-      <h1>Topics Page</h1>
       <p>This is the Topics page where you can explore various topics.</p>
     </div>
+    </>
+    
   );
 }
 

@@ -3,6 +3,7 @@ import Login from './pages/Login.tsx';
 import Topics from "./pages/Topics.tsx";
 import type { JSX } from "react";
 import Transfer from "./pages/Transfer.tsx";
+import Settings from "./pages/Settings.tsx";
 import { Profile, doLogout } from "./services/Web3Service.ts";
 
 function Router() {
@@ -15,6 +16,32 @@ function Router() {
         const isAuth = localStorage.getItem("account") !== null;
 
         return isAuth ? children : <Navigate to="/" replace />;
+    }
+
+    function CouncilRoute({ children }: Props) {
+
+        const isAuth = localStorage.getItem("account") !== null;
+        const isResident = parseInt(localStorage.getItem("profile") || "0") == Profile.RESIDENT;
+
+        if (isAuth && !isResident) {
+            return children;
+        } else {
+            doLogout();
+            return <Navigate to="/" replace />;
+        }
+    }
+
+    function ResidentRoute({ children }: Props) {
+
+        const isAuth = localStorage.getItem("account") !== null;
+        const isResident = parseInt(localStorage.getItem("profile") || "0") == Profile.RESIDENT;
+
+        if (isAuth && isResident) {
+            return children;
+        } else {
+            doLogout();
+            return <Navigate to="/" replace />;
+        }
     }
 
     function ManagerRoute({ children }: Props) {
@@ -45,7 +72,16 @@ function Router() {
                         <Transfer />
                     </ManagerRoute>
                 }
+
                 />
+
+                <Route path="/settings" element={
+                    <ManagerRoute>
+                        <Settings />
+                    </ManagerRoute>
+                }
+                />
+
             </Routes>
         </BrowserRouter>
     )

@@ -1,10 +1,14 @@
 import React from 'react';
+import Sidedar from '../components/Sidebar';
 
 function Transfer() {
     return (
+        <>
+        <Sidedar />
         <div>
-            Hello Transfer
+          <p>This is the Transfer page</p>
         </div>
+        </>
     )
 }
 
