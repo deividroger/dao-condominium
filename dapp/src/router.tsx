@@ -5,6 +5,8 @@ import type { JSX } from "react";
 import Transfer from "./pages/Transfer.tsx";
 import Settings from "./pages/Settings.tsx";
 import { Profile, doLogout } from "./services/Web3Service.ts";
+import Residents from "./pages/residents";
+import ResidentPage from "./pages/residents/ResidentPage.tsx";
 
 function Router() {
 
@@ -71,16 +73,30 @@ function Router() {
                     <ManagerRoute>
                         <Transfer />
                     </ManagerRoute>
-                }
-
-                />
+                } />
 
                 <Route path="/settings" element={
                     <ManagerRoute>
                         <Settings />
                     </ManagerRoute>
-                }
-                />
+                } />
+
+                <Route path="/residents" element={
+                    <CouncilRoute>
+                        <Residents />
+                    </CouncilRoute>
+                } />
+                <Route path="/residents/new" element={
+                    <CouncilRoute>
+                        <ResidentPage />
+                    </CouncilRoute>
+                } />
+
+                <Route path="/residents/edit/:wallet" element={
+                    <ManagerRoute>
+                        <ResidentPage />
+                    </ManagerRoute>
+                } />
 
             </Routes>
         </BrowserRouter>
