@@ -5,5 +5,5 @@ import Router from './router.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Router />
-  </StrictMode>,
+  </StrictMode>
 )

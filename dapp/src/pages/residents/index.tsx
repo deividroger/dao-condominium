@@ -8,6 +8,7 @@ import { getResidents, removeResident, type Resident } from "../../services/Web3
 import Loader from "../../components/Loader";
 import Pagination from "../../components/Pagination";
 import { ethers } from "ethers";
+import { deleteApiResident } from "../../services/ApiService";
 
 function Residents() {
 
@@ -25,18 +26,18 @@ function Residents() {
         return new URLSearchParams(useLocation().search);
     }
     const query = useQuery();
-    
+
     useEffect(() => {
         setIsLoading(true);
         getResidents(parseInt(query.get("page") || "1"))
-        .then(result => {
-            setResidents(result.residents);
-            setCount(result.total);
-            setIsLoading(false);
-        }).catch(err => {
-            setError(err.message);
-            setIsLoading(false);
-        });
+            .then(result => {
+                setResidents(result.residents);
+                setCount(result.total);
+                setIsLoading(false);
+            }).catch(err => {
+                setError(err.message);
+                setIsLoading(false);
+            });
 
         const tx = query.get("tx");
 
@@ -46,12 +47,17 @@ function Residents() {
 
     function onDeleteResident(wallet: string): void {
         setIsLoading(true);
-        removeResident(wallet).then(result => {
-            navigate("/residents?tx=" + result.hash);
-        }).catch(err => {
-            setIsLoading(false);
-            setError(err.message);
-        });
+
+        const promiseBlockchain = removeResident(wallet);
+        const promiseBackend = deleteApiResident(wallet);
+
+        Promise.all([promiseBlockchain, promiseBackend])
+            .then(result => {
+                navigate("/residents?tx=" + result[0].hash);
+            }).catch(err => {
+                setIsLoading(false);
+                setError(err.message);
+            });
     }
 
     return (

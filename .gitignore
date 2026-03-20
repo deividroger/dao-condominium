@@ -17,3 +17,5 @@ artifacts
 ignition/deployments/chain-31337
 coverage
 coverage.json
+dist
+data

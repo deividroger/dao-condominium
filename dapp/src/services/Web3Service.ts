@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
 import ABI from './ABI.json';
+import { doApiLogin } from './ApiService';
+
 
 const ADAPTER_ADDRESS = import.meta.env.VITE_ADAPTER_ADDRESS;
 
@@ -21,6 +23,7 @@ export type Resident = {
 
 export type LoginResult = {
     account: string;
+    token: string
     profile: Profile;
 }
 
@@ -93,15 +96,25 @@ export async function doLogin(): Promise<LoginResult> {
 
     localStorage.setItem('account', accounts[0]);
 
+    const signer =  await provider.getSigner();
+    const timestamp = Date.now();
+    const message = `Authenticating to Condominium ${timestamp}`;
+    const secret = await signer.signMessage(message);
+
+    const token = await doApiLogin(accounts[0],secret,timestamp);
+    localStorage.setItem("token", token);
+
     return {
         account: accounts[0],
-        profile: parseInt(localStorage.getItem("profile") || "0")
+        profile: parseInt(localStorage.getItem("profile") || "0"),
+        token: token
     } as LoginResult
 }
 
 export function doLogout() {
     localStorage.removeItem("account");
     localStorage.removeItem("profile");
+    localStorage.removeItem("token");
 }
 
 export async function getContractAddress(): Promise<string> {
